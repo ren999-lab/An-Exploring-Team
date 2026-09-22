@@ -19,7 +19,7 @@ from .netlist_parser import PDK_LIMITS, PDK_LIMITS_TEXT, parse_netlist
 from .param_reducer import (CSV_FIELDS, count_raw_variables,
                             export_reduced_netlist, export_variables_csv,
                             reduce_parameters)
-from .topology_recognizer import recognize
+from .topology_recognizer import device_role_map, recognize
 
 
 def build_result(nl, variables, modules, source, reduced_stats):
@@ -46,6 +46,9 @@ def build_result(nl, variables, modules, source, reduced_stats):
         },
         "modules": modules,
         "module_summary": dict(Counter(m["module_type"] for m in modules)),
+        "device_roles": device_role_map(modules),
+        "role_summary": dict(Counter(
+            r for m in modules for r in (m.get("roles") or [m["module_type"]]))),
         "variable_reduction": {
             "before": before,
             "after_free": len(free_vars),
@@ -99,10 +102,14 @@ def main():
     (out / "topology_result.json").write_text(
         json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    print(f"[agent2] 模块识别: {len(modules)} 组")
+    print(f"[agent2] 模块识别: {len(modules)} 组"
+          f"（多角色标注：{len(result['device_roles'])} 个器件参与识别）")
     for m in modules:
         scope = m.get("scope") or "顶层"
-        print(f"   - [{scope}] {m['module_type']}: {', '.join(m['devices'])}")
+        roles = m.get("roles") or [m["module_type"]]
+        extra = f" [角色: {'+'.join(roles)}]" if len(roles) > 1 else ""
+        print(f"   - [{scope}] {m['module_type']}: "
+              f"{', '.join(m['devices'])}{extra}")
     vr = result["variable_reduction"]
     print(f"[agent2] 变量约减: {vr['before']} -> 自由变量 {vr['after_free']} 个"
           f"（含联动共 {vr['after_total']} 个，约减率 {vr['reduction_ratio']:.0%}）")
