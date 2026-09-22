@@ -133,8 +133,13 @@ class TestMirrorRatio(unittest.TestCase):
         self.assertEqual(self.vars["M6_m"]["derived_max"], 5)
 
     def test_no_illegal_variable_name(self):
-        self.assertNotIn("*3_w", self.text)
-        self.assertNotIn("*4_m}", self.text.replace("=M6_m*4", ""))
+        # 只看网表正文：注释里会引用这个错误写法作为回归目标说明
+        body = "\n".join(l for l in self.text.splitlines()
+                         if not l.strip().startswith("*"))
+        self.assertNotIn("*3_w", body)
+        self.assertNotIn("*4_m}", body)
+        self.assertIn(".param M5_w='M4_w*3'", body)
+        self.assertIn(".param M7_m='M6_m*4'", body)
 
     def test_all_braces_resolve_to_declared_params(self):
         declared = {p.split("=")[0].strip()
