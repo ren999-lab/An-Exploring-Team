@@ -19,13 +19,17 @@
 │   ├── netlist_parser.py        #   SPICE 网表解析（命名中立、保留 subckt 作用域）
 │   ├── topology_recognizer.py   #   多角色标注：电流镜/差分对/尾源/有源负载/共源共栅/输出级…
 │   └── param_reducer.py         #   参数约减 + 变量CSV + 变量化网表
+├── demo.py                      # 全链路演示入口：一句话进 → 结果表出（演示视频/答辩用）
 ├── optimization.py              # 第③问 提交入口（CLI 与赛题 run_opt_command.sh 对齐）
 ├── q3_optimizer/                # 第③问 优化器（可行性优先多目标 DE）
 │   ├── paramfile.py             #   参数文件保真读写 + 单位换算
 │   ├── simulator.py             #   仿真适配层 + 指标解析 + 本地测试替身
+│   ├── scoring.py               #   赛题 6.3 评分公式复现（自评/方案选优）
 │   └── optimize.py              #   约束处理 / 预算规划 / DE / Pareto 存档 / 断点续跑
 ├── tools/pack_submission.py     # 第④问 提交包打包与结构校验
-├── tests/                       # 回归测试集（84 个用例，无需 API Key / 无需服务器）
+├── tools/make_report.py         # 技术报告自动生成（Markdown + SVG 图表）
+├── tools/convert_params.py      # 变量表 ↔ 参数文件 转换与接口校验
+├── tests/                       # 回归测试集（132 个用例，无需 API Key / 无需服务器）
 │   ├── netlists/*.sp            #   金标准网表（每个都对应一个历史缺陷）
 │   ├── data/                    #   参数文件 / variables.csv 样例
 │   ├── test_spec_rules.py       #   第①问：四要素、GM、中英文、单位换算
@@ -43,6 +47,10 @@
 ```bash
 pip install -r requirements.txt
 setx DASHSCOPE_API_KEY "sk-你的Key"   # 阿里云百炼申请，重开终端生效
+
+# ★ 全链路演示（推荐先跑这个）：一句话进 → 结果表出，不需要 API Key
+python demo.py "设计全差分运放，相位裕度≥60°，工作电流3mA，增益尽可能大，面积尽可能小"
+python demo.py "..." --run-opt        # 再现场跑一遍第③问优化（mock 仿真器）
 
 # 第①问：Spec 解析（带 Key 时 = LLM + 规则交叉校验；加 --no-llm 则纯规则）
 python -m agent1_spec_parser.main "设计全差分运放，PM≥60°，工作电流3mA，增益尽可能大..."
@@ -65,7 +73,15 @@ python optimization.py --ae_lib <lib> --ae_cell <cell> --ae_view <view> \
 # 打包提交（阶段 5）
 python tools/pack_submission.py
 
-# 回归测试（84 个用例，纯本地、不需要 Key、不需要服务器）
+# 变量表 ↔ 参数文件 接口校验（拿到真实 param_file 后第一件事）
+python tools/convert_params.py check \
+    --variables agent2_topology/output/variables.csv \
+    --param-file extractcdfVal_0.txt
+
+# 自动生成技术报告
+python tools/make_report.py --run-local
+
+# 回归测试（132 个用例，纯本地、不需要 Key、不需要服务器）
 python -m unittest discover -s tests -t . -v
 SPEC_TEST_LLM=1 python -m unittest discover -s tests -t .   # 额外跑真实 LLM 冒烟
 ```
@@ -236,6 +252,26 @@ VPN 掉线后加 `--resume` 继续，不浪费已花掉的时间。
 
 `optimization_log.jsonl` 逐次记录每次评估的参数、指标与违反度；
 `optimization_result.json` 汇总评估次数、代数、耗时、约束满足情况与 Pareto 解集。
+
+### 赛题评分口径自评（`q3_optimizer/scoring.py`）
+
+按赛题 6.3 的公式复现评分，输出分两块：
+
+* **约束项 30 分**——**客观有意义**，只看我们自己的结果是否达标
+  （PM/GM/I_OPA 各 10 分，任一不满足该项归零）；
+* **目标项 40 分**——赛题按"与冠军成绩的比例"给分，而我们没有冠军成绩，
+  因此以**本方初始解**为参照，只用来量化改进倍数，**不代表最终排名得分**。
+
+自评结果会写进 `optimization_result.json` 的 `self_assessment`，并渲染到演示输出与报告里。
+
+### 全链路演示入口（`demo.py`）
+
+```bash
+python demo.py "设计全差分运放，PM≥60°，工作电流3mA，增益尽可能大" --run-opt
+```
+
+一条命令串起①②③问，把 JSON 渲染成人能看的表格（终端列宽按东亚字符宽度对齐，
+中文不错位），并强制 stdout 走 UTF-8 避免中文控制台乱码 —— 录演示视频与答辩时用这个。
 
 ### 接口契约（阶段 1 拿到真实资产后需要替换的部分）
 

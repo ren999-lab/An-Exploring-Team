@@ -302,6 +302,18 @@ class TestEndToEnd(ScratchCase):
         # 变量数不能超过实际评估次数（预算被尊重）
         self.assertLessEqual(summary["n_evals"], 60)
 
+        # 自评：约束项按赛题口径客观计算，目标项以初始解为参照
+        sa = summary["self_assessment"]
+        self.assertGreaterEqual(sa["constraint_score"], 0.0)
+        self.assertLessEqual(sa["constraint_score"], 30.0)
+        self.assertEqual(set(sa["constraint_detail"]), {"PM", "GM", "I_OPA"})
+        for k in ("PM", "GM", "I_OPA"):
+            self.assertIn("passed", sa["constraint_detail"][k])
+        self.assertEqual(set(sa["ratios_vs_baseline"]), {"dc_gain", "ugb", "area"})
+        # 初始值与最优值都要留在结果里，否则报告无法做对比
+        self.assertIn("first_result", summary)
+        self.assertIsNotNone(summary["first_result"].get("pm_deg"))
+
     def test_only_free_variables_are_optimized(self):
         """联动变量（如 M2_w==M1_w）不能作为独立优化变量。"""
         import optimization

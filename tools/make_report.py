@@ -507,6 +507,29 @@ def sec_optimizer(ctx):
         lines.append(f"\n![Pareto 权衡]({ctx['figures']['pareto']})\n")
         lines.append(f"Pareto 非支配解 {len(opt.get('pareto', []))} 个，"
                      f"完整数据见 `optimization_result.json`。\n")
+
+    sa = opt.get("self_assessment") or {}
+    if sa:
+        lines.append("\n### 4.5 赛题 6.3 评分口径自评\n")
+        cd = sa.get("constraint_detail") or {}
+        lines.append("**约束项（满分 30，客观口径）**\n")
+        lines.append("| 约束 | 要求 | 实测 | 判定 | 得分 |")
+        lines.append("|---|---|---|---|---|")
+        rules = {"PM": "≥ 50 deg", "GM": "≤ -10 dB", "I_OPA": "≤ 3 mA"}
+        for k in ("PM", "GM", "I_OPA"):
+            d = cd.get(k) or {}
+            lines.append(f"| {k} | {rules[k]} | {_num(d.get('value'))} | "
+                         f"{'达标' if d.get('passed') else '未达标'} | "
+                         f"{d.get('points')}/10 |")
+        lines.append(f"\n**约束项合计：{sa.get('constraint_score')} / 30 分**\n")
+        rr = sa.get("ratios_vs_baseline") or {}
+        lines.append("**目标项改进倍数（相对本方初始解）**\n")
+        lines.append("| 指标 | 改进倍数 | 说明 |")
+        lines.append("|---|---|---|")
+        lines.append(f"| DCGain | {_num(rr.get('dc_gain'))}× | 越大越好 |")
+        lines.append(f"| UGB | {_num(rr.get('ugb'))}× | 越大越好 |")
+        lines.append(f"| Area | {_num(rr.get('area'))}× | 越小越好（>1 表示面积缩小）|")
+        lines.append(f"\n> {sa.get('note', '')}\n")
     return "\n".join(lines)
 
 

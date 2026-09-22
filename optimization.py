@@ -267,6 +267,30 @@ def main(argv=None):
     best_x = result["best_x"]
     best = result["best_result"]
     feasible = cons.check(_res(best))
+
+    # ---- 赛题 6.3 评分口径自评 ----
+    # constraint_score(30 分) 是**客观有意义**的：它只取决于我们自己的结果是否达标。
+    # 目标项(40 分)按"与冠军成绩的比例"给分，而我们没有冠军成绩，
+    # 因此这里以**本方初始解**为参照，只用来量化改进幅度，不代表最终排名得分。
+    from q3_optimizer.scoring import constraint_score, objective_score
+    c_score, c_detail = constraint_score(_res(best))
+    base_refs = {"dc_gain_db": first.dc_gain_db, "ugb_hz": first.ugb_hz,
+                 "area_um2": first.area_um2}
+    o_score, o_detail = objective_score(_res(best), base_refs)
+    self_assessment = {
+        "constraint_score": round(c_score, 2),
+        "constraint_detail": c_detail,
+        "objective_score_vs_baseline": round(o_score, 2),
+        "objective_detail": o_detail,
+        "ratios_vs_baseline": {
+            "dc_gain": _safe_ratio(best.get("dc_gain_db"), first.dc_gain_db),
+            "ugb": _safe_ratio(best.get("ugb_hz"), first.ugb_hz),
+            "area": _safe_ratio(first.area_um2, best.get("area_um2")),
+        },
+        "note": "约束项 30 分按赛题口径客观计算；目标项 40 分以本方初始解为参照，"
+                "仅表示改进幅度（真实得分需与冠军队成绩比较）。",
+    }
+
     summary = {
         "ae": {"lib": args.ae_lib, "cell": args.ae_cell, "view": args.ae_view,
                "mde_cell": args.mde_cell, "mde_view": args.mde_view},
@@ -274,6 +298,7 @@ def main(argv=None):
         "mode": "mock" if args.mock else "command",
         "variables": keys,
         "x0": x0,
+        "first_result": first.as_dict(),
         "best_x": best_x,
         "best_result": best,
         "best_violations": feasible,
@@ -287,6 +312,7 @@ def main(argv=None):
         "elapsed_sec": round(elapsed, 2),
         "pareto": result["pareto"],
         "checkpoint": ckpt,
+        "self_assessment": self_assessment,
     }
     (out_dir / "optimization_result.json").write_text(
         json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -325,7 +351,19 @@ def main(argv=None):
         f"{'Area':<12}{_g(first.area_um2):>16}{_g(best.get('area_um2')):>16}{'越小越好':>18}",
         "=" * 68,
         f"Pareto 非支配解: {len(summary['pareto'])} 个（见 optimization_result.json）",
+        "-" * 68,
+        f"约束项自评（赛题 6.3(2)，满分 30）: "
+        f"{self_assessment['constraint_score']} 分",
     ]
+    for k in ("PM", "GM", "I_OPA"):
+        d = self_assessment["constraint_detail"].get(k, {})
+        mark = "达标" if d.get("passed") else "未达标"
+        lines.append(f"    {k:<6} {mark}  得分 {d.get('points')}/10")
+    r = self_assessment["ratios_vs_baseline"]
+    lines.append(f"目标项相对初始解改进倍数: DCGain {_g(r['dc_gain'])}x  "
+                 f"UGB {_g(r['ugb'])}x  Area {_g(r['area'])}x")
+    lines.append("    （赛题目标项按与冠军成绩的比例给分，无冠军成绩故只报改进倍数）")
+    lines.append("=" * 68)
     log_f.write("\n".join(lines) + "\n")
     log_f.close()
     (out_dir / args.output_file).write_text("\n".join(lines) + "\n",
@@ -348,6 +386,15 @@ def _g(v):
     if v is None:
         return "-"
     return f"{v:.6g}"
+
+
+def _safe_ratio(a, b):
+    try:
+        if a is None or b in (None, 0):
+            return None
+        return round(float(a) / float(b), 4)
+    except (TypeError, ValueError):
+        return None
 
 
 if __name__ == "__main__":
