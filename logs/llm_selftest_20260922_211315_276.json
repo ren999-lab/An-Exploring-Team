@@ -1,0 +1,38 @@
+{
+  "time": "20260922_211315_276",
+  "tag": "selftest",
+  "transport": "compatible",
+  "model": "qwen3.8-max",
+  "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+  "elapsed_sec": 4.94,
+  "request": {
+    "model": "qwen3.8-max",
+    "messages": [
+      {
+        "role": "system",
+        "content": "只输出JSON，不要解释。"
+      },
+      {
+        "role": "user",
+        "content": "把\"增益裕度不大于-10dB\"转成 {\"key\":..,\"op\":..,\"value\":..,\"unit\":..}"
+      }
+    ],
+    "temperature": 0.1,
+    "max_tokens": 2048
+  },
+  "reasoning_content": "用户要求把中文短语“增益裕度不大于-10dB”转换成 JSON 对象 {\"key\":..,\"op\":..,\"value\":..,\"unit\":..}，并且只输出 JSON，不解释。\n\n需要确定字段：\n- key: 指标名称，应为“增益裕度”\n- op: 比较操作。“不大于”等价于 <=\n- value: 数值 -10\n- unit: dB\n\n输出应为合法 JSON。可能值类型：数值 -10 而非字符串。op 可用 \"<=\"。确保只输出 JSON。",
+  "response": "{\"key\":\"增益裕度\",\"op\":\"<=\",\"value\":-10,\"unit\":\"dB\"}",
+  "usage": {
+    "completion_tokens": 144,
+    "completion_tokens_details": {
+      "reasoning_tokens": 120,
+      "text_tokens": 144
+    },
+    "prompt_tokens": 90,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 90
+    },
+    "total_tokens": 234
+  }
+}

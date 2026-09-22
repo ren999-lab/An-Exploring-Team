@@ -1,0 +1,38 @@
+{
+  "time": "20260922_211415_371",
+  "tag": "spec_parse",
+  "transport": "compatible",
+  "model": "qwen3.8-max",
+  "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+  "elapsed_sec": 14.6,
+  "request": {
+    "model": "qwen3.8-max",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位模拟集成电路设计专家。你的任务是把自然语言描述的电路性能规格解析为严格的结构化 JSON（Spec）。\n\n输出必须是一个 JSON 对象，包含且仅包含以下字段：\n{\n  \"hard_constraints\": [     // 硬约束：出现\"不低于/至少/不超过/大于\"等硬性要求\n    {\"key\": <指标名>, \"op\": \"<>|<|>=|<=\", \"value\": <数值>, \"unit\": <单位>}\n  ],\n  \"optimization_targets\": [ // 优化目标：出现\"尽可能大/尽量小/越大越好\"等\n    {\"key\": <指标名>, \"direction\": \"max|min\", \"unit\": <单位>, \"priority\": <整数,1最高>}\n  ],\n  \"units\": { \"<指标名>\": \"<单位>\" },\n  \"priorities\": { \"<优化目标名>\": <整数> }\n}\n\n合法指标名（必须使用这些规范名）：\n- DCGain: 直流增益 (dB)\n- UGB: 单位增益带宽 (MHz)\n- PM: 相位裕度 (deg)\n- GM: 增益裕度 (dB)\n- I_OPA: 运放工作电流 (mA)\n- Area: 芯片面积 (um^2)\n- CMFB: 共模反馈 (bool, 若要求\"带共模反馈\"则放入 hard_constraints: {\"key\":\"CMFB\",\"op\":\">\",\"value\":0,\"unit\":\"bool\"})\n\n规则：\n1. 只输出 JSON，不要任何解释、不要 markdown 代码块。\n2. 单位统一：MHz、mA、dB、deg、um^2；\"所有PVT下\"等限定语附加到 constraint 的 \"cond\" 字段。\n3. 约束中的比较词映射：不低于/至少/大于等于→\">=\"，不超过/至多→\"<=\"，大于→\">\"，小于→\"<\"。\n4. 无法解析为数值的要求不得丢弃，放入 hard_constraints 并给 value=null。\n\n示例输入：请设计一个带有共模反馈的全差分运放，要求：DC 增益不低于95dB，单位增益带宽至少60MHz，相位裕度大于55度，所有PVT下工作电流不超过3mA，并尽量减小面积。\n示例输出：\n{\"hard_constraints\":[{\"key\":\"CMFB\",\"op\":\">\",\"value\":0,\"unit\":\"bool\"},{\"key\":\"DCGain\",\"op\":\">=\",\"value\":95,\"unit\":\"dB\"},{\"key\":\"UGB\",\"op\":\">=\",\"value\":60,\"unit\":\"MHz\"},{\"key\":\"PM\",\"op\":\">\",\"value\":55,\"unit\":\"deg\"},{\"key\":\"I_OPA\",\"op\":\"<=\",\"value\":3,\"unit\":\"mA\",\"cond\":\"所有PVT\"}],\n\"optimization_targets\":[{\"key\":\"Area\",\"direction\":\"min\",\"unit\":\"um^2\",\"priority\":1}],\n\"units\":{\"DCGain\":\"dB\",\"UGB\":\"MHz\",\"PM\":\"deg\",\"I_OPA\":\"mA\",\"Area\":\"um^2\"},\n\"priorities\":{\"Area\":1}}\n"
+      },
+      {
+        "role": "user",
+        "content": "请设计一个带有共模反馈的全差分运放，要求：DC增益不低于95dB，单位增益带宽至少60MHz，相位裕度大于55度，所有PVT下工作电流不超过3mA，并尽量减小面积。"
+      }
+    ],
+    "temperature": 0.1,
+    "max_tokens": 2048
+  },
+  "reasoning_content": "我们需要回答用户：将自然语言规格解析为严格 JSON，不要 markdown。输入与示例几乎相同。需要输出 JSON 对象，包含 hard_constraints, optimization_targets, units, priorities。指标合法名：DCGain, UGB, PM, GM, I_OPA, Area, CMFB。\n\n解析：\n“带有共模反馈” -> hard_constraints CMFB op > value 0 unit bool.\n“DC增益不低于95dB” -> DCGain >= 95 dB.\n“单位增益带宽至少60MHz” -> UGB >= 60 MHz.\n“相位裕度大于55度” -> PM > 55 deg.\n“所有PVT下工作电流不超过3mA” -> I_OPA <= 3 mA, cond 所有PVT.\n“尽量减小面积” -> optimization_targets Area min um^2 priority 1.\nunits 包含所有涉及指标：CMFB bool? 示例 units 没有 CMFB? 示例 units 只有 DCGain UGB PM I_OPA Area，没有 CMFB。题目说 units: \"<指标名>\": \"<单位>\"。可能应该包含所有指标？示例没有 CMFB，虽然 hard_constraints 有 CMFB unit bool。为保持一致，可以包含 CMFB? 输出字段 units 可以包含 CMFB: bool。但示例未包含。是否必须只包含指标名单位？合法指标名包括 CMFB。为了稳妥，包含所有出现的指标单位，包括 CMFB。但示例没有，可能他们不要求 CMFB in units? 用户说输出必须包含字段，未说 units 必须覆盖所有。包含 CMFB 应该不错。硬约束单位已有。\npriorities 只优化目标：Area 1.\n只输出 JSON，无代码块。确保有效 JSON。",
+  "response": "{\"hard_constraints\":[{\"key\":\"CMFB\",\"op\":\">\",\"value\":0,\"unit\":\"bool\"},{\"key\":\"DCGain\",\"op\":\">=\",\"value\":95,\"unit\":\"dB\"},{\"key\":\"UGB\",\"op\":\">=\",\"value\":60,\"unit\":\"MHz\"},{\"key\":\"PM\",\"op\":\">\",\"value\":55,\"unit\":\"deg\"},{\"key\":\"I_OPA\",\"op\":\"<=\",\"value\":3,\"unit\":\"mA\",\"cond\":\"所有PVT\"}],\"optimization_targets\":[{\"key\":\"Area\",\"direction\":\"min\",\"unit\":\"um^2\",\"priority\":1}],\"units\":{\"CMFB\":\"bool\",\"DCGain\":\"dB\",\"UGB\":\"MHz\",\"PM\":\"deg\",\"I_OPA\":\"mA\",\"Area\":\"um^2\"},\"priorities\":{\"Area\":1}}",
+  "usage": {
+    "completion_tokens": 547,
+    "completion_tokens_details": {
+      "reasoning_tokens": 379,
+      "text_tokens": 547
+    },
+    "prompt_tokens": 775,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "text_tokens": 775
+    },
+    "total_tokens": 1322
+  }
+}

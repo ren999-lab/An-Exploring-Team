@@ -1,3 +1,3 @@
 # 本地开发依赖（一、二问）
-openai>=1.0.0        # 通过 DashScope OpenAI 兼容接口调用 Qwen3.8-Max
+# LLM 调用为标准库 urllib 直连阿里云百炼 DashScope，无需任何第三方 LLM 客户端库
 pyyaml>=6.0
