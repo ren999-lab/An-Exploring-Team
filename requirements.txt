@@ -1,0 +1,3 @@
+# 本地开发依赖（一、二问）
+openai>=1.0.0        # 通过 DashScope OpenAI 兼容接口调用 Qwen3.8-Max
+pyyaml>=6.0

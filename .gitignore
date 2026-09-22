@@ -1,0 +1,9 @@
+config/config.yaml
+__pycache__/
+*.pyc
+logs/*.log
+.venv/
+.idea/
+.vscode/
+agent1_spec_parser/output/
+agent2_topology/output/

@@ -1,0 +1,15 @@
+# Qwen3.8-Max API 配置（赛题指定 LLM）
+# 复制本文件为 config.yaml 并填入真实 Key；config.yaml 已加入 .gitignore，不要提交
+
+llm:
+  # 阿里云百炼 DashScope 的 OpenAI 兼容端点
+  base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  # 模型名以百炼平台实际提供的 ID 为准（赛题要求 Qwen 3.8-Max）
+  model: "qwen3.8-max"
+  temperature: 0.1
+  max_tokens: 4096
+
+paths:
+  log_dir: "logs"
+  spec_output_dir: "agent1_spec_parser/output"
+  topo_output_dir: "agent2_topology/output"
