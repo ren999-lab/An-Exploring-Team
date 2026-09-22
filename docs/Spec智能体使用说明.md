@@ -33,7 +33,9 @@ python -m pip install -r requirements.txt
 
 ## 启动 UI
 
-在同一个 PowerShell 窗口运行：
+推荐直接双击项目根目录的 `启动UI.bat`。它会优先使用本项目上级目录的 `.conda` 环境，避免误用 Anaconda base 环境。
+
+也可以在同一个 PowerShell 窗口运行：
 
 ```powershell
 python -m streamlit run app.py
@@ -44,6 +46,8 @@ python -m streamlit run app.py
 ```text
 http://localhost:8501
 ```
+
+项目已关闭 Streamlit 的匿名使用统计，因此首次启动不需要填写 Email，也不会因统计服务无法连接而影响启动。
 
 页面中依次完成：
 
@@ -64,6 +68,18 @@ http://localhost:8501
 - Key 仅留在当前 Streamlit 页面会话的内存中；每次模型调用结束后，程序会恢复原本的进程环境变量。
 - 不要把 Key 发到聊天群、PPT、报告、截图或代码仓库。
 - 已经在公开聊天、截图或仓库中出现过的 Key，应立即到百炼控制台轮换。
+
+## 队友首次安装
+
+队友无需复制你的 Conda 环境，只需各自在自己的电脑配置一次。先安装 Miniconda 或 Anaconda，然后在 PowerShell 中执行：
+
+```powershell
+cd "团队项目所在目录\An-Exploring-Team"
+conda create --prefix "..\.conda" python=3.11 pip -y
+conda run --prefix "..\.conda" python -m pip install -r requirements.txt
+```
+
+随后双击 `启动UI.bat` 即可。每个人在自己的浏览器页面临时输入 API Key；不要把 Key 写入共享文件。
 
 ## 输出 JSON 怎么看
 
@@ -107,6 +123,8 @@ agent1_spec_parser\output\spec.json
 ### 点击后提示“解析失败”
 
 依次检查网络、Key 是否有效、百炼账户是否有对应模型权限和余额。错误提示中不要复制或截取 Key。
+
+若页面显示“已生成离线规则备份结果”，说明 Qwen 在线调用没有成功，页面展示的是本地规则解析的备份 JSON；该 JSON 可用于排查，但正式演示时应确保输出的 `source` 是 `llm+rule`。
 
 ### 浏览器没有自动打开
 

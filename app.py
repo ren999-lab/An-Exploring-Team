@@ -6,7 +6,7 @@ import json
 
 import streamlit as st
 
-from ui_logic import parse_for_ui
+from ui_logic import format_api_error, llm_failure_message, parse_for_ui
 
 EXAMPLE = (
     "设计一个带有共模反馈的全差分运放，要求：DC增益不低于95dB，"
@@ -17,6 +17,7 @@ EXAMPLE = (
 st.set_page_config(page_title="模拟电路 Spec 智能体", page_icon="⚡", layout="centered")
 st.title("模拟电路 Spec 智能体")
 st.caption("输入自然语言需求，调用 Qwen3.8-Max，输出可供后续拓扑识别与尺寸优化使用的 JSON。")
+st.info("当前模式：Qwen3.8-Max 在线解析。API 调用失败时请检查 Key、模型权限或网络。")
 
 api_key = st.text_input(
     "DashScope API Key",
@@ -35,9 +36,14 @@ if st.button("生成 Spec JSON", type="primary", use_container_width=True):
             try:
                 spec, errors = parse_for_ui(text, use_llm=True, api_key=api_key.strip())
             except (OSError, RuntimeError, ValueError) as exc:
-                st.error(f"解析失败：{exc}")
+                st.error(format_api_error(exc))
             else:
-                if errors:
+                online_error = llm_failure_message(spec) if spec else None
+                if online_error:
+                    st.error(online_error)
+                    st.caption("已生成离线规则备份结果，但本次 Qwen 在线解析未成功。")
+                    st.json(spec)
+                elif errors:
                     for error in errors:
                         st.error(error)
                 else:

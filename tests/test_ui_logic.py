@@ -3,7 +3,7 @@
 import os
 import unittest
 
-from ui_logic import parse_for_ui
+from ui_logic import format_api_error, llm_failure_message, parse_for_ui
 
 
 class TestParseForUi(unittest.TestCase):
@@ -54,6 +54,22 @@ class TestParseForUi(unittest.TestCase):
         self.assertEqual(spec["source"], "llm+rule")
         self.assertEqual(seen, {"key": "session-only-key", "use_llm": True})
         self.assertNotIn("DASHSCOPE_API_KEY", os.environ)
+
+    def test_invalid_key_error_has_a_safe_actionable_message(self):
+        message = format_api_error(RuntimeError("HTTP 401: invalid_api_key"))
+
+        self.assertIn("Key 无效", message)
+        self.assertNotIn("invalid_api_key", message)
+
+    def test_llm_fallback_is_reported_as_an_online_failure(self):
+        message = llm_failure_message(
+            {"source": "rule(LLM failed)", "llm_error": "HTTP 401: invalid_api_key"}
+        )
+
+        self.assertIn("Key 无效", message)
+
+    def test_successful_llm_result_has_no_failure_message(self):
+        self.assertIsNone(llm_failure_message({"source": "llm+rule"}))
 
 
 if __name__ == "__main__":
