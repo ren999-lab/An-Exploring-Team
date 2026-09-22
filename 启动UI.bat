@@ -1,14 +1,14 @@
 @echo off
 setlocal
-set "PROJECT_DIR=%~dp0"
-set "PROJECT_PYTHON=%PROJECT_DIR%..\.conda\python.exe"
+cd /d "%~dp0"
 
-if exist "%PROJECT_PYTHON%" (
-    "%PROJECT_PYTHON%" -m streamlit run "%PROJECT_DIR%app.py"
-) else (
-    echo [提示] 未找到上级目录的 .conda 环境，将使用当前 Python。
-    echo [提示] 若启动失败，请先阅读 docs\Spec智能体使用说明.md 的“队友首次安装”部分。
-    python -m streamlit run "%PROJECT_DIR%app.py"
-)
+if not exist "..\.conda\python.exe" goto :missing_python
+"..\.conda\python.exe" -m streamlit run app.py
+goto :end
 
+:missing_python
+echo Project Python was not found: ..\.conda\python.exe
+echo Read the setup guide in the docs folder for teammate setup steps.
+
+:end
 pause

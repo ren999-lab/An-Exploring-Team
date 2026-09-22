@@ -20,6 +20,11 @@ class TestProjectSetup(unittest.TestCase):
         self.assertIn("-m streamlit run", launcher)
         self.assertIn("app.py", launcher)
 
+    def test_launcher_is_ascii_only_for_cmd_compatibility(self):
+        data = (ROOT / "启动UI.bat").read_bytes()
+
+        self.assertTrue(all(byte < 128 for byte in data))
+
 
 if __name__ == "__main__":
     unittest.main()

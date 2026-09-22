@@ -35,6 +35,8 @@ python -m pip install -r requirements.txt
 
 推荐直接双击项目根目录的 `启动UI.bat`。它会优先使用本项目上级目录的 `.conda` 环境，避免误用 Anaconda base 环境。
 
+`启动UI.bat` 中的提示文字刻意只使用英文字符，这是为了兼容 Windows `cmd` 的本地编码；请不要用记事本在这个批处理文件中加入中文提示，否则可能再次出现“不是内部或外部命令”的乱码报错。
+
 也可以在同一个 PowerShell 窗口运行：
 
 ```powershell
