@@ -1,0 +1,27 @@
+{
+  "time": "20260922_230004_860",
+  "tag": "spec_parse",
+  "transport": "compatible",
+  "model": "qwen3.8-max",
+  "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+  "elapsed_sec": 0.27,
+  "request": {
+    "model": "qwen3.8-max",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位模拟集成电路设计专家。你的任务是把自然语言描述的电路性能规格解析为严格的结构化 JSON（Spec）。\n\n输出必须是一个 JSON 对象，包含且仅包含以下字段：\n{\n  \"hard_constraints\": [     // 硬约束：出现\"不低于/至少/不超过/大于\"等硬性要求\n    {\"key\": <指标名>, \"op\": \"<>|<|>=|<=\", \"value\": <数值>, \"unit\": <单位>}\n  ],\n  \"optimization_targets\": [ // 优化目标：出现\"尽可能大/尽量小/越大越好\"等\n    {\"key\": <指标名>, \"direction\": \"max|min\", \"unit\": <单位>, \"priority\": <整数,1最高>}\n  ],\n  \"units\": { \"<指标名>\": \"<单位>\" },\n  \"priorities\": { \"<优化目标名>\": <整数> }\n}\n\n合法指标名（必须使用这些规范名）：\n- DCGain: 直流增益 (dB)\n- UGB: 单位增益带宽 (MHz)\n- PM: 相位裕度 (deg)\n- GM: 增益裕度 (dB)\n- I_OPA: 运放工作电流 (mA)\n- Area: 芯片面积 (um^2)\n- CMFB: 共模反馈 (bool, 若要求\"带共模反馈\"则放入 hard_constraints: {\"key\":\"CMFB\",\"op\":\">\",\"value\":0,\"unit\":\"bool\"})\n\n规则：\n1. 只输出 JSON，不要任何解释、不要 markdown 代码块。\n2. 单位统一：MHz、mA、dB、deg、um^2；\"所有PVT下\"等限定语附加到 constraint 的 \"cond\" 字段。\n3. 约束中的比较词映射：不低于/至少/大于等于→\">=\"，不超过/至多→\"<=\"，大于→\">\"，小于→\"<\"。\n4. 无法解析为数值的要求不得丢弃，放入 hard_constraints 并给 value=null。\n\n示例输入：请设计一个带有共模反馈的全差分运放，要求：DC 增益不低于95dB，单位增益带宽至少60MHz，相位裕度大于55度，所有PVT下工作电流不超过3mA，并尽量减小面积。\n示例输出：\n{\"hard_constraints\":[{\"key\":\"CMFB\",\"op\":\">\",\"value\":0,\"unit\":\"bool\"},{\"key\":\"DCGain\",\"op\":\">=\",\"value\":95,\"unit\":\"dB\"},{\"key\":\"UGB\",\"op\":\">=\",\"value\":60,\"unit\":\"MHz\"},{\"key\":\"PM\",\"op\":\">\",\"value\":55,\"unit\":\"deg\"},{\"key\":\"I_OPA\",\"op\":\"<=\",\"value\":3,\"unit\":\"mA\",\"cond\":\"所有PVT\"}],\n\"optimization_targets\":[{\"key\":\"Area\",\"direction\":\"min\",\"unit\":\"um^2\",\"priority\":1}],\n\"units\":{\"DCGain\":\"dB\",\"UGB\":\"MHz\",\"PM\":\"deg\",\"I_OPA\":\"mA\",\"Area\":\"um^2\"},\n\"priorities\":{\"Area\":1}}\n"
+      },
+      {
+        "role": "user",
+        "content": "设计一个带有共模反馈的全差分运放，要求：DC增益不低于95dB，单位增益带宽至少60MHz，相位裕度大于55度，所有PVT下工作电流不超过3mA，并尽量减小面积。"
+      }
+    ],
+    "temperature": 0.1,
+    "max_tokens": 2048
+  },
+  "reasoning_content": "",
+  "response": "",
+  "usage": null,
+  "error": "HTTP 401: {\"error\":{\"message\":\"Incorrect API key provided. For details, see: https://help.aliyun.com/zh/model-studio/error-code#apikey-error\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_api_key\"},\"request_id\":\"40fc0be4-db9b-91d5-ac0c-a33082777ae7\"}"
+}

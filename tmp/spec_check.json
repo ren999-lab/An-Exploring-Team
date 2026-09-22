@@ -1,0 +1,77 @@
+{
+  "schema_version": "1.1",
+  "source": "rule",
+  "hard_constraints": [
+    {
+      "key": "CMFB",
+      "op": ">",
+      "value": 0,
+      "unit": "bool",
+      "derived_from": "关键词提及"
+    },
+    {
+      "key": "DCGain",
+      "op": ">=",
+      "value": 95,
+      "unit": "dB"
+    },
+    {
+      "key": "UGB",
+      "op": ">=",
+      "value": 60,
+      "unit": "MHz"
+    },
+    {
+      "key": "PM",
+      "op": ">",
+      "value": 55,
+      "unit": "deg"
+    },
+    {
+      "key": "I_OPA",
+      "op": "<=",
+      "value": 3,
+      "unit": "mA",
+      "cond": "所有PVT"
+    }
+  ],
+  "optimization_targets": [
+    {
+      "key": "UGB",
+      "direction": "max",
+      "unit": "MHz",
+      "derived_from": ">= 60",
+      "priority": 1
+    },
+    {
+      "key": "Area",
+      "direction": "min",
+      "unit": "um^2",
+      "priority": 2
+    },
+    {
+      "key": "DCGain",
+      "direction": "max",
+      "unit": "dB",
+      "derived_from": ">= 95",
+      "priority": 3
+    }
+  ],
+  "units": {
+    "CMFB": "bool",
+    "DCGain": "dB",
+    "UGB": "MHz",
+    "PM": "deg",
+    "I_OPA": "mA",
+    "Area": "um^2"
+  },
+  "priorities": {
+    "UGB": 1,
+    "Area": 2,
+    "DCGain": 3
+  },
+  "assumptions": [],
+  "unparsed_requirements": [],
+  "cross_check": {},
+  "raw_text": "设计带共模反馈的全差分运放，DC增益不低于95dB，单位增益带宽至少60MHz，相位裕度大于55度，所有PVT下工作电流不超过3mA，并尽量减小面积。"
+}

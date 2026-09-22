@@ -1,0 +1,813 @@
+{
+  "schema_version": "1.1",
+  "source_netlist": "tests\\sample_netlist.sp",
+  "netlist": {
+    "total_devices": 13,
+    "device_counts": {
+      "M": 10,
+      "R": 1,
+      "C": 2,
+      "L": 0
+    },
+    "scopes": [
+      {
+        "name": "opa",
+        "devices": 13,
+        "mos": 10,
+        "modules": 8
+      }
+    ],
+    "other_devices": []
+  },
+  "modules": [
+    {
+      "module_type": "Dummy器件",
+      "devices": [
+        "MDUM1",
+        "MDUM2"
+      ],
+      "scope": "opa",
+      "evidence": "D/S 接同一节点（或命名含 dummy），栅接固定偏置/电源轨，不参与信号放大"
+    },
+    {
+      "module_type": "电流镜",
+      "devices": [
+        "M7",
+        "M3",
+        "M4"
+      ],
+      "scope": "opa",
+      "evidence": "PMOS 源极共连 vdd，栅极共连 mirp；M7 栅漏短接为参考臂"
+    },
+    {
+      "module_type": "输入对管（差分对）",
+      "devices": [
+        "M1",
+        "M2"
+      ],
+      "scope": "opa",
+      "evidence": "两管极性相同、源极共连至尾节点 tail，栅极分别接 inp / inn"
+    },
+    {
+      "module_type": "尾电流源",
+      "devices": [
+        "M0"
+      ],
+      "scope": "opa",
+      "evidence": "漏极接差分对尾节点，源极接电源轨 vdd，栅接固定偏置 biasp"
+    },
+    {
+      "module_type": "匹配器件",
+      "devices": [
+        "M1",
+        "M2"
+      ],
+      "scope": "opa",
+      "evidence": "同类模型且尺寸参数完全相同，属版图匹配结构"
+    },
+    {
+      "module_type": "匹配器件",
+      "devices": [
+        "M3",
+        "M4",
+        "M7"
+      ],
+      "scope": "opa",
+      "evidence": "同类模型且尺寸参数完全相同，属版图匹配结构"
+    },
+    {
+      "module_type": "匹配器件",
+      "devices": [
+        "M5",
+        "M6"
+      ],
+      "scope": "opa",
+      "evidence": "同类模型且尺寸参数完全相同，属版图匹配结构"
+    },
+    {
+      "module_type": "无源器件（RC/去耦，用途待确认）",
+      "devices": [
+        "RC1",
+        "CC1",
+        "CDEC"
+      ],
+      "scope": "opa",
+      "evidence": "电阻/电容/电感：可能是密勒补偿、调零电阻或电源去耦，按 PDK 以 W/L/Seg 参数化"
+    }
+  ],
+  "module_summary": {
+    "Dummy器件": 1,
+    "电流镜": 1,
+    "输入对管（差分对）": 1,
+    "尾电流源": 1,
+    "匹配器件": 3,
+    "无源器件（RC/去耦，用途待确认）": 1
+  },
+  "variable_reduction": {
+    "before": 33,
+    "after_free": 15,
+    "after_total": 27,
+    "reduction_ratio": 0.5455,
+    "free_variables": [
+      "M7_w",
+      "M7_l",
+      "M7_m",
+      "M1_w",
+      "M1_l",
+      "M1_m",
+      "M0_w",
+      "M0_l",
+      "M0_m",
+      "M5_w",
+      "M5_l",
+      "M5_m",
+      "RC1_value",
+      "CC1_value",
+      "CDEC_value"
+    ],
+    "linked_variables": [
+      {
+        "name": "M3_w",
+        "constraint": "=M7_w"
+      },
+      {
+        "name": "M3_l",
+        "constraint": "=M7_l"
+      },
+      {
+        "name": "M3_m",
+        "constraint": "=M7_m"
+      },
+      {
+        "name": "M4_w",
+        "constraint": "=M7_w"
+      },
+      {
+        "name": "M4_l",
+        "constraint": "=M7_l"
+      },
+      {
+        "name": "M4_m",
+        "constraint": "=M7_m"
+      },
+      {
+        "name": "M2_w",
+        "constraint": "=M1_w"
+      },
+      {
+        "name": "M2_l",
+        "constraint": "=M1_l"
+      },
+      {
+        "name": "M2_m",
+        "constraint": "=M1_m"
+      },
+      {
+        "name": "M6_w",
+        "constraint": "=M5_w"
+      },
+      {
+        "name": "M6_l",
+        "constraint": "=M5_l"
+      },
+      {
+        "name": "M6_m",
+        "constraint": "=M5_m"
+      }
+    ]
+  },
+  "pdk_limits": {
+    "table": {
+      "M": {
+        "w": [
+          0.13,
+          20.0,
+          "um",
+          "float"
+        ],
+        "l": [
+          0.13,
+          10.0,
+          "um",
+          "float"
+        ],
+        "m": [
+          1,
+          20,
+          "",
+          "int"
+        ]
+      },
+      "C": {
+        "w": [
+          0.13,
+          20.0,
+          "um",
+          "float"
+        ],
+        "l": [
+          0.13,
+          20.0,
+          "um",
+          "float"
+        ]
+      },
+      "R": {
+        "seg": [
+          1,
+          20,
+          "",
+          "int"
+        ]
+      },
+      "L": {}
+    },
+    "text": {
+      "M": "W 0.13u~20u, L 0.13u~10u, m 1~20(整数)",
+      "R": "Seg 1~20(整数)",
+      "C": "L 0.13u~20u (W 沿用同区间)",
+      "L": "以 PDK 器件为准"
+    },
+    "area_formula": {
+      "transistor": "f*w*L*m*1.5",
+      "capacitor": "W*L",
+      "resistor": "W*L*2"
+    }
+  },
+  "netlist_reduced": {
+    "patched_lines": 11,
+    "unpatched_variables": [],
+    "free": 15,
+    "linked": 12,
+    "total": 27
+  },
+  "variables": [
+    {
+      "name": "M7_w",
+      "device": "M7",
+      "devices": [
+        "M7"
+      ],
+      "param": "w",
+      "constraint": "free",
+      "ref_var": null,
+      "ratio": null,
+      "value": "4u",
+      "value_si": 4e-06,
+      "unit": "um",
+      "min": 0.13,
+      "max": 20.0,
+      "type": "float",
+      "derived_max": null,
+      "reason": "电流镜参考臂，自由变量",
+      "scope": "opa",
+      "dtype": "M"
+    },
+    {
+      "name": "M7_l",
+      "device": "M7",
+      "devices": [
+        "M7"
+      ],
+      "param": "l",
+      "constraint": "free",
+      "ref_var": null,
+      "ratio": null,
+      "value": "0.5u",
+      "value_si": 5e-07,
+      "unit": "um",
+      "min": 0.13,
+      "max": 10.0,
+      "type": "float",
+      "derived_max": null,
+      "reason": "电流镜参考臂，自由变量",
+      "scope": "opa",
+      "dtype": "M"
+    },
+    {
+      "name": "M7_m",
+      "device": "M7",
+      "devices": [
+        "M7"
+      ],
+      "param": "m",
+      "constraint": "free",
+      "ref_var": null,
+      "ratio": null,
+      "value": "1",
+      "value_si": 1.0,
+      "unit": "",
+      "min": 1,
+      "max": 20,
+      "type": "int",
+      "derived_max": null,
+      "reason": "电流镜参考臂，自由变量",
+      "scope": "opa",
+      "dtype": "M"
+    },
+    {
+      "name": "M3_w",
+      "device": "M3",
+      "devices": [
+        "M3"
+      ],
+      "param": "w",
+      "constraint": "=M7_w",
+      "ref_var": "M7_w",
+      "ratio": 1.0,
+      "value": "4u",
+      "value_si": 4e-06,
+      "unit": "um",
+      "min": 0.13,
+      "max": 20.0,
+      "type": "float",
+      "derived_max": null,
+      "reason": "电流镜镜像联动，按初始比例随参考臂缩放（非独立变量）",
+      "scope": "opa",
+      "dtype": "M"
+    },
+    {
+      "name": "M3_l",
+      "device": "M3",
+      "devices": [
+        "M3"
+      ],
+      "param": "l",
+      "constraint": "=M7_l",
+      "ref_var": "M7_l",
+      "ratio": 1.0,
+      "value": "0.5u",
+      "value_si": 5e-07,
+      "unit": "um",
+      "min": 0.13,
+      "max": 10.0,
+      "type": "float",
+      "derived_max": null,
+      "reason": "电流镜镜像联动，按初始比例随参考臂缩放（非独立变量）",
+      "scope": "opa",
+      "dtype": "M"
+    },
+    {
+      "name": "M3_m",
+      "device": "M3",
+      "devices": [
+        "M3"
+      ],
+      "param": "m",
+      "constraint": "=M7_m",
+      "ref_var": "M7_m",
+      "ratio": 1.0,
+      "value": "1",
+      "value_si": 1.0,
+      "unit": "",
+      "min": 1,
+      "max": 20,
+      "type": "int",
+      "derived_max": null,
+      "reason": "电流镜镜像联动，按初始比例随参考臂缩放（非独立变量）",
+      "scope": "opa",
+      "dtype": "M"
+    },
+    {
+      "name": "M4_w",
+      "device": "M4",
+      "devices": [
+        "M4"
+      ],
+      "param": "w",
+      "constraint": "=M7_w",
+      "ref_var": "M7_w",
+      "ratio": 1.0,
+      "value": "4u",
+      "value_si": 4e-06,
+      "unit": "um",
+      "min": 0.13,
+      "max": 20.0,
+      "type": "float",
+      "derived_max": null,
+      "reason": "电流镜镜像联动，按初始比例随参考臂缩放（非独立变量）",
+      "scope": "opa",
+      "dtype": "M"
+    },
+    {
+      "name": "M4_l",
+      "device": "M4",
+      "devices": [
+        "M4"
+      ],
+      "param": "l",
+      "constraint": "=M7_l",
+      "ref_var": "M7_l",
+      "ratio": 1.0,
+      "value": "0.5u",
+      "value_si": 5e-07,
+      "unit": "um",
+      "min": 0.13,
+      "max": 10.0,
+      "type": "float",
+      "derived_max": null,
+      "reason": "电流镜镜像联动，按初始比例随参考臂缩放（非独立变量）",
+      "scope": "opa",
+      "dtype": "M"
+    },
+    {
+      "name": "M4_m",
+      "device": "M4",
+      "devices": [
+        "M4"
+      ],
+      "param": "m",
+      "constraint": "=M7_m",
+      "ref_var": "M7_m",
+      "ratio": 1.0,
+      "value": "1",
+      "value_si": 1.0,
+      "unit": "",
+      "min": 1,
+      "max": 20,
+      "type": "int",
+      "derived_max": null,
+      "reason": "电流镜镜像联动，按初始比例随参考臂缩放（非独立变量）",
+      "scope": "opa",
+      "dtype": "M"
+    },
+    {
+      "name": "M1_w",
+      "device": "M1",
+      "devices": [
+        "M1"
+      ],
+      "param": "w",
+      "constraint": "free",
+      "ref_var": null,
+      "ratio": null,
+      "value": "2u",
+      "value_si": 2e-06,
+      "unit": "um",
+      "min": 0.13,
+      "max": 20.0,
+      "type": "float",
+      "derived_max": null,
+      "reason": "输入对管（差分对）各管强制同尺寸，合并为单变量",
+      "scope": "opa",
+      "dtype": "M"
+    },
+    {
+      "name": "M1_l",
+      "device": "M1",
+      "devices": [
+        "M1"
+      ],
+      "param": "l",
+      "constraint": "free",
+      "ref_var": null,
+      "ratio": null,
+      "value": "0.5u",
+      "value_si": 5e-07,
+      "unit": "um",
+      "min": 0.13,
+      "max": 10.0,
+      "type": "float",
+      "derived_max": null,
+      "reason": "输入对管（差分对）各管强制同尺寸，合并为单变量",
+      "scope": "opa",
+      "dtype": "M"
+    },
+    {
+      "name": "M1_m",
+      "device": "M1",
+      "devices": [
+        "M1"
+      ],
+      "param": "m",
+      "constraint": "free",
+      "ref_var": null,
+      "ratio": null,
+      "value": "1",
+      "value_si": 1.0,
+      "unit": "",
+      "min": 1,
+      "max": 20,
+      "type": "int",
+      "derived_max": null,
+      "reason": "输入对管（差分对）各管强制同尺寸，合并为单变量",
+      "scope": "opa",
+      "dtype": "M"
+    },
+    {
+      "name": "M2_w",
+      "device": "M2",
+      "devices": [
+        "M2"
+      ],
+      "param": "w",
+      "constraint": "=M1_w",
+      "ref_var": "M1_w",
+      "ratio": 1.0,
+      "value": "2u",
+      "value_si": 2e-06,
+      "unit": "um",
+      "min": 0.13,
+      "max": 20.0,
+      "type": "float",
+      "derived_max": null,
+      "reason": "匹配联动，强制与首器件同尺寸（非独立变量）",
+      "scope": "opa",
+      "dtype": "M"
+    },
+    {
+      "name": "M2_l",
+      "device": "M2",
+      "devices": [
+        "M2"
+      ],
+      "param": "l",
+      "constraint": "=M1_l",
+      "ref_var": "M1_l",
+      "ratio": 1.0,
+      "value": "0.5u",
+      "value_si": 5e-07,
+      "unit": "um",
+      "min": 0.13,
+      "max": 10.0,
+      "type": "float",
+      "derived_max": null,
+      "reason": "匹配联动，强制与首器件同尺寸（非独立变量）",
+      "scope": "opa",
+      "dtype": "M"
+    },
+    {
+      "name": "M2_m",
+      "device": "M2",
+      "devices": [
+        "M2"
+      ],
+      "param": "m",
+      "constraint": "=M1_m",
+      "ref_var": "M1_m",
+      "ratio": 1.0,
+      "value": "1",
+      "value_si": 1.0,
+      "unit": "",
+      "min": 1,
+      "max": 20,
+      "type": "int",
+      "derived_max": null,
+      "reason": "匹配联动，强制与首器件同尺寸（非独立变量）",
+      "scope": "opa",
+      "dtype": "M"
+    },
+    {
+      "name": "M0_w",
+      "device": "M0",
+      "devices": [
+        "M0"
+      ],
+      "param": "w",
+      "constraint": "free",
+      "ref_var": null,
+      "ratio": null,
+      "value": "4u",
+      "value_si": 4e-06,
+      "unit": "um",
+      "min": 0.13,
+      "max": 20.0,
+      "type": "float",
+      "derived_max": null,
+      "reason": "尾电流源成员，保留为独立变量",
+      "scope": "opa",
+      "dtype": "M"
+    },
+    {
+      "name": "M0_l",
+      "device": "M0",
+      "devices": [
+        "M0"
+      ],
+      "param": "l",
+      "constraint": "free",
+      "ref_var": null,
+      "ratio": null,
+      "value": "0.5u",
+      "value_si": 5e-07,
+      "unit": "um",
+      "min": 0.13,
+      "max": 10.0,
+      "type": "float",
+      "derived_max": null,
+      "reason": "尾电流源成员，保留为独立变量",
+      "scope": "opa",
+      "dtype": "M"
+    },
+    {
+      "name": "M0_m",
+      "device": "M0",
+      "devices": [
+        "M0"
+      ],
+      "param": "m",
+      "constraint": "free",
+      "ref_var": null,
+      "ratio": null,
+      "value": "2",
+      "value_si": 2.0,
+      "unit": "",
+      "min": 1,
+      "max": 20,
+      "type": "int",
+      "derived_max": null,
+      "reason": "尾电流源成员，保留为独立变量",
+      "scope": "opa",
+      "dtype": "M"
+    },
+    {
+      "name": "M5_w",
+      "device": "M5",
+      "devices": [
+        "M5"
+      ],
+      "param": "w",
+      "constraint": "free",
+      "ref_var": null,
+      "ratio": null,
+      "value": "8u",
+      "value_si": 8e-06,
+      "unit": "um",
+      "min": 0.13,
+      "max": 20.0,
+      "type": "float",
+      "derived_max": null,
+      "reason": "匹配器件各管强制同尺寸，合并为单变量",
+      "scope": "opa",
+      "dtype": "M"
+    },
+    {
+      "name": "M5_l",
+      "device": "M5",
+      "devices": [
+        "M5"
+      ],
+      "param": "l",
+      "constraint": "free",
+      "ref_var": null,
+      "ratio": null,
+      "value": "0.5u",
+      "value_si": 5e-07,
+      "unit": "um",
+      "min": 0.13,
+      "max": 10.0,
+      "type": "float",
+      "derived_max": null,
+      "reason": "匹配器件各管强制同尺寸，合并为单变量",
+      "scope": "opa",
+      "dtype": "M"
+    },
+    {
+      "name": "M5_m",
+      "device": "M5",
+      "devices": [
+        "M5"
+      ],
+      "param": "m",
+      "constraint": "free",
+      "ref_var": null,
+      "ratio": null,
+      "value": "2",
+      "value_si": 2.0,
+      "unit": "",
+      "min": 1,
+      "max": 20,
+      "type": "int",
+      "derived_max": null,
+      "reason": "匹配器件各管强制同尺寸，合并为单变量",
+      "scope": "opa",
+      "dtype": "M"
+    },
+    {
+      "name": "M6_w",
+      "device": "M6",
+      "devices": [
+        "M6"
+      ],
+      "param": "w",
+      "constraint": "=M5_w",
+      "ref_var": "M5_w",
+      "ratio": 1.0,
+      "value": "8u",
+      "value_si": 8e-06,
+      "unit": "um",
+      "min": 0.13,
+      "max": 20.0,
+      "type": "float",
+      "derived_max": null,
+      "reason": "匹配联动，强制与首器件同尺寸（非独立变量）",
+      "scope": "opa",
+      "dtype": "M"
+    },
+    {
+      "name": "M6_l",
+      "device": "M6",
+      "devices": [
+        "M6"
+      ],
+      "param": "l",
+      "constraint": "=M5_l",
+      "ref_var": "M5_l",
+      "ratio": 1.0,
+      "value": "0.5u",
+      "value_si": 5e-07,
+      "unit": "um",
+      "min": 0.13,
+      "max": 10.0,
+      "type": "float",
+      "derived_max": null,
+      "reason": "匹配联动，强制与首器件同尺寸（非独立变量）",
+      "scope": "opa",
+      "dtype": "M"
+    },
+    {
+      "name": "M6_m",
+      "device": "M6",
+      "devices": [
+        "M6"
+      ],
+      "param": "m",
+      "constraint": "=M5_m",
+      "ref_var": "M5_m",
+      "ratio": 1.0,
+      "value": "2",
+      "value_si": 2.0,
+      "unit": "",
+      "min": 1,
+      "max": 20,
+      "type": "int",
+      "derived_max": null,
+      "reason": "匹配联动，强制与首器件同尺寸（非独立变量）",
+      "scope": "opa",
+      "dtype": "M"
+    },
+    {
+      "name": "RC1_value",
+      "device": "RC1",
+      "devices": [
+        "RC1"
+      ],
+      "param": "value",
+      "constraint": "free",
+      "ref_var": null,
+      "ratio": null,
+      "value": "1k",
+      "value_si": 1000.0,
+      "unit": "ohm",
+      "min": null,
+      "max": null,
+      "type": "float",
+      "derived_max": null,
+      "reason": "无源器件（RC/去耦，用途待确认）成员，保留为独立变量",
+      "scope": "opa",
+      "dtype": "R"
+    },
+    {
+      "name": "CC1_value",
+      "device": "CC1",
+      "devices": [
+        "CC1"
+      ],
+      "param": "value",
+      "constraint": "free",
+      "ref_var": null,
+      "ratio": null,
+      "value": "1p",
+      "value_si": 1e-12,
+      "unit": "F",
+      "min": null,
+      "max": null,
+      "type": "float",
+      "derived_max": null,
+      "reason": "无源器件（RC/去耦，用途待确认）成员，保留为独立变量",
+      "scope": "opa",
+      "dtype": "C"
+    },
+    {
+      "name": "CDEC_value",
+      "device": "CDEC",
+      "devices": [
+        "CDEC"
+      ],
+      "param": "value",
+      "constraint": "free",
+      "ref_var": null,
+      "ratio": null,
+      "value": "10p",
+      "value_si": 1e-11,
+      "unit": "F",
+      "min": null,
+      "max": null,
+      "type": "float",
+      "derived_max": null,
+      "reason": "无源器件（RC/去耦，用途待确认）成员，保留为独立变量",
+      "scope": "opa",
+      "dtype": "C"
+    }
+  ]
+}
