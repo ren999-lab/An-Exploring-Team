@@ -1,3 +1,4 @@
 # 本地开发依赖（一、二问）
 # LLM 调用为标准库 urllib 直连阿里云百炼 DashScope，无需任何第三方 LLM 客户端库
 pyyaml>=6.0
+streamlit>=1.40
