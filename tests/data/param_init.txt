@@ -1,0 +1,12 @@
+# extractcdfVal_0.txt 示意样例（真实格式待服务器阶段1确认后替换）
+# 格式：<实例名>_<cdf参数>=<值>
+M0_w=5u
+M0_l=1u
+M0_m=1
+M1_w=10u
+M1_l=1u
+M1_m=1
+M5_w=15u      # 输出级宽度
+M5_l=1u
+M5_m=2
+CC1_value=3p

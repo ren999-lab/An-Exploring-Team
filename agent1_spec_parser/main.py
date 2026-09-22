@@ -334,7 +334,7 @@ DEFAULT_TEXT = ("请设计一个带有共模反馈的全差分运放，要求：
                 "并尽量减小面积。")
 
 
-def main():
+def main(argv=None):
     ap = argparse.ArgumentParser(description="自然语言 Spec 解析 Agent")
     ap.add_argument("text", nargs="*", help="自然语言性能描述")
     ap.add_argument("--input", "-i", help="从文件读取自然语言描述")
@@ -343,13 +343,15 @@ def main():
     ap.add_argument("--strict", action="store_true",
                     help="不补赛题默认约束（只输出原文明确写到的内容）")
     ap.add_argument("--max-tokens", type=int, default=2048)
-    args = ap.parse_args()
+    ap.add_argument("--quiet", action="store_true", help="只输出结果，不打印进度（供编排入口调用）")
+    args = ap.parse_args(argv)
 
     text = Path(args.input).read_text(encoding="utf-8") if args.input \
         else " ".join(args.text)
+    say = (lambda *a, **k: None) if args.quiet else print
     if not text.strip():
         text = DEFAULT_TEXT
-        print("[agent1] 未提供输入，使用赛题示例文本")
+        say("[agent1] 未提供输入，使用赛题示例文本")
 
     spec = parse_spec(text, use_llm=not args.no_llm,
                       apply_competition_defaults=not args.strict,
@@ -357,13 +359,13 @@ def main():
     out = Path(args.output)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(spec, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"[agent1] Spec 已输出: {out}  (source={spec.get('source')})")
+    say(f"[agent1] Spec 已输出: {out}  (source={spec.get('source')})")
 
     problems = validate_spec(spec)
-    print("[agent1] 四要素校验:", "通过" if not problems else problems)
-    print(f"[agent1] 硬约束 {len(spec['hard_constraints'])} 项 / "
-          f"优化目标 {len(spec['optimization_targets'])} 项 / "
-          f"假设 {len(spec.get('assumptions', []))} 条")
+    say("[agent1] 四要素校验:", "通过" if not problems else problems)
+    say(f"[agent1] 硬约束 {len(spec['hard_constraints'])} 项 / "
+        f"优化目标 {len(spec['optimization_targets'])} 项 / "
+        f"假设 {len(spec.get('assumptions', []))} 条")
     return 0 if not problems else 1
 
 

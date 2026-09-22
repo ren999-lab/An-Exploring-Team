@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="340" viewBox="0 0 680 340">
+<rect width="680" height="340" fill="#ffffff"/>
+<text x="340.0" y="24" text-anchor="middle" font-size="15" font-family="sans-serif" fill="#222">拓扑模块识别分布</text>
+<rect x="130" y="50.8" width="520.0" height="15.7" fill="#2f6fb0" rx="2"/>
+<text x="122" y="62.6" text-anchor="end" font-size="12" font-family="sans-serif" fill="#333">匹配器件</text>
+<text x="656.0" y="62.6" font-size="12" font-family="sans-serif" fill="#333">3</text>
+<rect x="130" y="76.2" width="173.3" height="15.7" fill="#2f6fb0" rx="2"/>
+<text x="122" y="88.0" text-anchor="end" font-size="12" font-family="sans-serif" fill="#333">Dummy器件</text>
+<text x="309.3" y="88.0" font-size="12" font-family="sans-serif" fill="#333">1</text>
+<rect x="130" y="101.6" width="173.3" height="15.7" fill="#2f6fb0" rx="2"/>
+<text x="122" y="113.4" text-anchor="end" font-size="12" font-family="sans-serif" fill="#333">输入对管（差分对）</text>
+<text x="309.3" y="113.4" font-size="12" font-family="sans-serif" fill="#333">1</text>
+<rect x="130" y="127.0" width="173.3" height="15.7" fill="#2f6fb0" rx="2"/>
+<text x="122" y="138.8" text-anchor="end" font-size="12" font-family="sans-serif" fill="#333">尾电流源</text>
+<text x="309.3" y="138.8" font-size="12" font-family="sans-serif" fill="#333">1</text>
+<rect x="130" y="152.4" width="173.3" height="15.7" fill="#2f6fb0" rx="2"/>
+<text x="122" y="164.2" text-anchor="end" font-size="12" font-family="sans-serif" fill="#333">电流镜</text>
+<text x="309.3" y="164.2" font-size="12" font-family="sans-serif" fill="#333">1</text>
+<rect x="130" y="177.8" width="173.3" height="15.7" fill="#2f6fb0" rx="2"/>
+<text x="122" y="189.6" text-anchor="end" font-size="12" font-family="sans-serif" fill="#333">共源共栅（cascode）</text>
+<text x="309.3" y="189.6" font-size="12" font-family="sans-serif" fill="#333">1</text>
+<rect x="130" y="203.2" width="173.3" height="15.7" fill="#2f6fb0" rx="2"/>
+<text x="122" y="215.0" text-anchor="end" font-size="12" font-family="sans-serif" fill="#333">有源负载</text>
+<text x="309.3" y="215.0" font-size="12" font-family="sans-serif" fill="#333">1</text>
+<rect x="130" y="228.6" width="173.3" height="15.7" fill="#2f6fb0" rx="2"/>
+<text x="122" y="240.4" text-anchor="end" font-size="12" font-family="sans-serif" fill="#333">输出级</text>
+<text x="309.3" y="240.4" font-size="12" font-family="sans-serif" fill="#333">1</text>
+<rect x="130" y="254.0" width="173.3" height="15.7" fill="#2f6fb0" rx="2"/>
+<text x="122" y="265.8" text-anchor="end" font-size="12" font-family="sans-serif" fill="#333">补偿网络（密勒补偿）</text>
+<text x="309.3" y="265.8" font-size="12" font-family="sans-serif" fill="#333">1</text>
+<rect x="130" y="279.4" width="173.3" height="15.7" fill="#2f6fb0" rx="2"/>
+<text x="122" y="291.2" text-anchor="end" font-size="12" font-family="sans-serif" fill="#333">去耦电容</text>
+<text x="309.3" y="291.2" font-size="12" font-family="sans-serif" fill="#333">1</text>
+<line x1="130" y1="300" x2="650" y2="300" stroke="#bbb"/>
+</svg>

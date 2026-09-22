@@ -1,0 +1,13 @@
+variable,value,min,max,unit,type,devices,param,constraint,reason
+M1_w,10u,0.13,20.0,um,float,M1,w,free,输入对管合并为单变量
+M1_l,1u,0.13,10.0,um,float,M1,l,free,输入对管合并为单变量
+M1_m,1,1,20,,int,M1,m,free,输入对管合并为单变量
+M5_w,15u,0.13,20.0,um,float,M5,w,free,输出级
+M5_l,1u,0.13,10.0,um,float,M5,l,free,输出级
+M5_m,2,1,20,,int,M5,m,free,输出级
+M0_w,5u,0.13,20.0,um,float,M0,w,free,尾电流源
+M0_l,1u,0.13,10.0,um,float,M0,l,free,尾电流源
+M0_m,1,1,20,,int,M0,m,free,尾电流源
+CC1_value,3p,,,F,float,CC1,value,free,补偿电容
+M2_w,10u,0.13,20.0,um,float,M2,w,=M1_w,匹配联动
+M6_w,15u,0.13,20.0,um,float,M6,w,=M5_w,匹配联动

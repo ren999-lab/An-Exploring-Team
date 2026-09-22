@@ -172,40 +172,52 @@ def reduce_parameters(netlist):
     return variables, modules
 
 
+# 依赖型模块：会在器件之间建立"参考臂/首器件 -> 联动变量"的关系。
+# 由于识别是多角色标注，同一批器件可能同时出现在"共源共栅/输出级"等模块里，
+# 必须**先**由这些模块认领，否则匹配对（如输出级 M5/M6）会各自变成独立变量，
+# 白白丢掉一半的约减收益。
+MERGE_MODULES = ("电流镜", "输入对管（差分对）", "匹配器件")
+
+
 def _reduce_scope(scope, devs, modules, q):
+    """单作用域约减。
+
+    注意：本函数内部一律用**器件原名**做查表/去重，只有生成变量名时才用 `q()`
+    加作用域前缀。原因是 `recognize()` 返回的模块里器件名是不带前缀的，
+    若这里用带前缀的名字查表，多作用域网表会全部查不到，导致约减率为 0。
+    """
     variables = []
-    by_name = {q(d.name): d for d in devs}
+    by_name = {d.name: d for d in devs}
     covered = set()
 
     def free(dev, reason):
-        params = default_params(dev)
-        for p in params:
+        for p in default_params(dev):
             variables.append(_mk_var(dev, p, "free", None, None, reason, scope, q))
-        covered.add(q(dev.name))
+        covered.add(dev.name)
 
     def dependent(dev, ref, reason, force_equal=False):
         for p in default_params(dev):
             ratio = 1.0 if force_equal else _ratio_for(dev, ref, p)
             variables.append(_mk_var(dev, p, "linked", ref, ratio, reason, scope, q))
-        covered.add(q(dev.name))
+        covered.add(dev.name)
 
-    for mod in modules:
+    def handle(mod):
         mtype = mod["module_type"]
         group = [by_name[n] for n in mod["devices"] if n in by_name]
-        group = [d for d in group if q(d.name) not in covered]
+        group = [d for d in group if d.name not in covered]
         if not group:
-            continue
+            return
 
         if mtype == "Dummy器件":
-            covered.update(q(d.name) for d in group)
-            continue
+            covered.update(d.name for d in group)     # Dummy 不设优化变量
+            return
 
         if mtype == "电流镜":
             ref = group[0]
             free(ref, "电流镜参考臂，自由变量")
             for s in group[1:]:
                 dependent(s, ref, "电流镜镜像联动，按初始比例随参考臂缩放（非独立变量）")
-            continue
+            return
 
         if mtype in ("输入对管（差分对）", "匹配器件"):
             head = group[0]
@@ -213,15 +225,23 @@ def _reduce_scope(scope, devs, modules, q):
             for r in group[1:]:
                 dependent(r, head, "匹配联动，强制与首器件同尺寸（非独立变量）",
                           force_equal=True)
-            continue
+            return
 
-        # 尾电流源 / 有源负载 / 其他
         for d in group:
             free(d, f"{mtype}成员，保留为独立变量")
 
+    # 第一遍：依赖型模块（建立自由变量 + 联动约束）
+    for mod in modules:
+        if mod["module_type"] in MERGE_MODULES:
+            handle(mod)
+    # 第二遍：其余模块（含共源共栅/有源负载/输出级/无源网络/其他）
+    for mod in modules:
+        if mod["module_type"] not in MERGE_MODULES:
+            handle(mod)
+
     # 未被任何模块认领的器件，保守保留
     for d in devs:
-        if q(d.name) in covered:
+        if d.name in covered:
             continue
         if d.dtype == "M":
             free(d, "未识别模块成员，保守保留为独立变量")

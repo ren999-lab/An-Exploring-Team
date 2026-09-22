@@ -19,7 +19,7 @@ from .netlist_parser import PDK_LIMITS, PDK_LIMITS_TEXT, parse_netlist
 from .param_reducer import (CSV_FIELDS, count_raw_variables,
                             export_reduced_netlist, export_variables_csv,
                             reduce_parameters)
-from .topology_recognizer import recognize
+from .topology_recognizer import device_role_map, recognize
 
 
 def build_result(nl, variables, modules, source, reduced_stats):
@@ -46,6 +46,9 @@ def build_result(nl, variables, modules, source, reduced_stats):
         },
         "modules": modules,
         "module_summary": dict(Counter(m["module_type"] for m in modules)),
+        "device_roles": device_role_map(modules),
+        "role_summary": dict(Counter(
+            r for m in modules for r in (m.get("roles") or [m["module_type"]]))),
         "variable_reduction": {
             "before": before,
             "after_free": len(free_vars),
@@ -71,24 +74,26 @@ def build_result(nl, variables, modules, source, reduced_stats):
     }
 
 
-def main():
+def main(argv=None):
     ap = argparse.ArgumentParser(description="拓扑模块识别与参数约减 Agent")
     ap.add_argument("netlist", help="SPICE 网表路径")
     ap.add_argument("-o", "--output", default="agent2_topology/output")
-    args = ap.parse_args()
+    ap.add_argument("--quiet", action="store_true", help="只输出结果，不打印进度（供编排入口调用）")
+    args = ap.parse_args(argv)
 
     out = Path(args.output)
     out.mkdir(parents=True, exist_ok=True)
+    say = (lambda *a, **k: None) if args.quiet else print
 
     nl = parse_netlist(args.netlist)
     counts = Counter(d.dtype for d in nl.devices)
-    print(f"[agent2] 解析到 {len(nl.devices)} 个器件 "
-          f"(M:{counts.get('M', 0)} R:{counts.get('R', 0)} "
-          f"C:{counts.get('C', 0)} L:{counts.get('L', 0)})，"
-          f"{len(nl.analysis_scopes())} 个作用域")
+    say(f"[agent2] 解析到 {len(nl.devices)} 个器件 "
+        f"(M:{counts.get('M', 0)} R:{counts.get('R', 0)} "
+        f"C:{counts.get('C', 0)} L:{counts.get('L', 0)})，"
+        f"{len(nl.analysis_scopes())} 个作用域")
     if nl.others:
-        print(f"[agent2] 另有 {len(nl.others)} 个不做参数化的器件类型: "
-              f"{sorted({d.dtype for d in nl.others})}")
+        say(f"[agent2] 另有 {len(nl.others)} 个不做参数化的器件类型: "
+            f"{sorted({d.dtype for d in nl.others})}")
 
     variables, modules = reduce_parameters(nl)
     reduced_stats = export_reduced_netlist(
@@ -99,18 +104,22 @@ def main():
     (out / "topology_result.json").write_text(
         json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    print(f"[agent2] 模块识别: {len(modules)} 组")
+    say(f"[agent2] 模块识别: {len(modules)} 组"
+        f"（多角色标注：{len(result['device_roles'])} 个器件参与识别）")
     for m in modules:
         scope = m.get("scope") or "顶层"
-        print(f"   - [{scope}] {m['module_type']}: {', '.join(m['devices'])}")
+        roles = m.get("roles") or [m["module_type"]]
+        extra = f" [角色: {'+'.join(roles)}]" if len(roles) > 1 else ""
+        say(f"   - [{scope}] {m['module_type']}: "
+            f"{', '.join(m['devices'])}{extra}")
     vr = result["variable_reduction"]
-    print(f"[agent2] 变量约减: {vr['before']} -> 自由变量 {vr['after_free']} 个"
-          f"（含联动共 {vr['after_total']} 个，约减率 {vr['reduction_ratio']:.0%}）")
+    say(f"[agent2] 变量约减: {vr['before']} -> 自由变量 {vr['after_free']} 个"
+        f"（含联动共 {vr['after_total']} 个，约减率 {vr['reduction_ratio']:.0%}）")
     if reduced_stats.get("unpatched_variables"):
-        print(f"[agent2] 提示: {len(reduced_stats['unpatched_variables'])} 个变量来自"
-              f"层次实例展开，无法在原网表行内就地变量化")
-    print(f"[agent2] 交付物已写入 {out}/ "
-          f"(topology_result.json, variables.csv, netlist_reduced.sp)")
+        say(f"[agent2] 提示: {len(reduced_stats['unpatched_variables'])} 个变量来自"
+            f"层次实例展开，无法在原网表行内就地变量化")
+    say(f"[agent2] 交付物已写入 {out}/ "
+        f"(topology_result.json, variables.csv, netlist_reduced.sp)")
     return 0
 
 
