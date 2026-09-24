@@ -4,7 +4,7 @@ chcp 65001 >nul
 cd /d "%~dp0"
 
 rem ---------------------------------------------------------------------------
-rem Launch the Streamlit demo page.
+rem Launch the Streamlit demo page for "Analog Circuit AI Design Agent".
 rem
 rem Interpreter lookup order:
 rem   1) project python  ..\.conda\python.exe
@@ -12,10 +12,11 @@ rem   2) virtualenv      .venv\Scripts\python.exe
 rem   3) system python
 rem   4) py -3 launcher
 rem
-rem The old version hard-coded ..\.conda\python.exe, which does not exist on
-rem most machines, so double-clicking always failed with
-rem "Project Python was not found". This version probes for an interpreter and
-rem prints the exact install command when streamlit is missing.
+rem Port selection:
+rem   8501 is the Streamlit default and is very often already taken by ANOTHER
+rem   project's Streamlit app. When that happens the browser silently shows
+rem   somebody else's page, which is extremely confusing. So we scan
+rem   8501..8520 and use the first free port, then print the exact URL.
 rem
 rem NOTE: keep this file pure ASCII - cmd.exe may decode it as GBK.
 rem ---------------------------------------------------------------------------
@@ -51,9 +52,32 @@ if errorlevel 1 (
     goto :end
 )
 
-echo [i] Starting the page; your browser will open automatically.
-echo [i] Close this window to stop the server.
-%PY% -m streamlit run app.py
+rem ---- pick a free port ----------------------------------------------------
+set "PORT=8501"
+
+:findport
+netstat -ano | findstr ":%PORT% " | findstr "LISTENING" >nul 2>nul
+if errorlevel 1 goto portok
+set /a PORT+=1
+if !PORT! GTR 8520 (
+    echo [X] No free port in 8501..8520. Close some Streamlit windows first.
+    goto :end
+)
+goto findport
+
+:portok
+if not "%PORT%"=="8501" (
+    echo [i] Port 8501 is busy (another Streamlit app is using it).
+)
+
+echo.
+echo [i] Serving on :  http://localhost:%PORT%
+echo [i] Opening your browser now; if the page looks empty, refresh once.
+echo [i] Close this window (or press Ctrl+C) to stop the server.
+echo.
+
+start "" http://localhost:%PORT%
+%PY% -m streamlit run app.py --server.port %PORT% --server.headless true
 
 :end
 echo.

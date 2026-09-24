@@ -2,6 +2,10 @@ config/config.yaml
 __pycache__/
 *.pyc
 logs/*.log
+logs/*.json
+demo_output/
+tests/_scratch/
+tmp/
 .venv/
 .idea/
 .vscode/
