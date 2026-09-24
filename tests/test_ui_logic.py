@@ -39,16 +39,16 @@ class TestParseForUi(unittest.TestCase):
                 "priorities": {"Area": 1},
             }
 
-        try:
-            spec, errors = parse_for_ui(
-                "相位裕度不低于50度，面积尽可能小。",
-                use_llm=True,
-                api_key="session-only-key",
-                parser=parser,
-            )
-        finally:
-            if previous is not None:
-                os.environ["DASHSCOPE_API_KEY"] = previous
+        # 用 addCleanup 而不是 finally：finally 会在断言之前就把环境变量恢复回去，
+        # 导致"本机已设置 DASHSCOPE_API_KEY"时这条用例必然失败。
+        if previous is not None:
+            self.addCleanup(os.environ.__setitem__, "DASHSCOPE_API_KEY", previous)
+        spec, errors = parse_for_ui(
+            "相位裕度不低于50度，面积尽可能小。",
+            use_llm=True,
+            api_key="session-only-key",
+            parser=parser,
+        )
 
         self.assertEqual(errors, [])
         self.assertEqual(spec["source"], "llm+rule")
