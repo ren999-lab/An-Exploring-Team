@@ -23,34 +23,19 @@ rem ---------------------------------------------------------------------------
 
 set "PY="
 
-if exist "..\.conda\python.exe" (
-    set "PY=..\.conda\python.exe"
-) else if exist ".venv\Scripts\python.exe" (
-    set "PY=.venv\Scripts\python.exe"
-) else (
-    where python >nul 2>nul
-    if not errorlevel 1 set "PY=python"
-)
+if exist "..\.conda\python.exe" set "PY=..\.conda\python.exe"
+if not defined PY if exist ".venv\Scripts\python.exe" set "PY=.venv\Scripts\python.exe"
+if not defined PY where python >nul 2>nul
+if not defined PY if not errorlevel 1 set "PY=python"
 
-if not defined PY (
-    where py >nul 2>nul
-    if not errorlevel 1 set "PY=py -3"
-)
+if not defined PY where py >nul 2>nul
+if not defined PY if not errorlevel 1 set "PY=py -3"
 
-if not defined PY (
-    echo [X] No Python found.
-    echo     Install Python 3.9+ with "Add to PATH" checked, then run this again.
-    goto :end
-)
+if not defined PY goto no_python
 
 echo [i] Using Python: %PY%
 %PY% -c "import streamlit" >nul 2>nul
-if errorlevel 1 (
-    echo [X] streamlit is not installed for this Python.
-    echo     Run this first:
-    echo         %PY% -m pip install -r requirements.txt
-    goto :end
-)
+if errorlevel 1 goto no_streamlit
 
 rem ---- pick a free port ----------------------------------------------------
 set "PORT=8501"
@@ -59,16 +44,11 @@ set "PORT=8501"
 netstat -ano | findstr ":%PORT% " | findstr "LISTENING" >nul 2>nul
 if errorlevel 1 goto portok
 set /a PORT+=1
-if !PORT! GTR 8520 (
-    echo [X] No free port in 8501..8520. Close some Streamlit windows first.
-    goto :end
-)
+if !PORT! GTR 8520 goto no_port
 goto findport
 
 :portok
-if not "%PORT%"=="8501" (
-    echo [i] Port 8501 is busy (another Streamlit app is using it).
-)
+if not "%PORT%"=="8501" echo [i] Port 8501 is busy (another Streamlit app is using it).
 
 echo.
 echo [i] Serving on :  http://localhost:%PORT%
@@ -78,6 +58,21 @@ echo.
 
 start "" http://localhost:%PORT%
 %PY% -m streamlit run app.py --server.port %PORT% --server.headless true
+goto :end
+
+:no_python
+echo [X] No Python found.
+echo     Install Python 3.9+ with "Add to PATH" checked, then run this again.
+goto :end
+
+:no_streamlit
+echo [X] streamlit is not installed for this Python.
+echo     Run this first:
+echo         %PY% -m pip install -r requirements.txt
+goto :end
+
+:no_port
+echo [X] No free port in 8501..8520. Close some Streamlit windows first.
 
 :end
 echo.
