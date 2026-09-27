@@ -6,11 +6,16 @@ cd /d "%~dp0"
 rem ---------------------------------------------------------------------------
 rem Launch the Streamlit demo page for "Analog Circuit AI Design Agent".
 rem
-rem Interpreter lookup order:
-rem   1) project python  ..\.conda\python.exe
-rem   2) virtualenv      .venv\Scripts\python.exe
-rem   3) system python
-rem   4) py -3 launcher
+rem Interpreter selection:
+rem   Having a "python" on PATH is NOT enough - it must be a Python that can
+rem   actually "import streamlit". On this machine "where python" resolves first
+rem   to a managed 3.13 build WITHOUT streamlit, while the usable one is
+rem   Python314 reached through "py -3". So each candidate is probed with
+rem   "import streamlit" and the first one that passes wins.
+rem
+rem   Probe order:
+rem     1) ..\.conda\python.exe            2) .venv\Scripts\python.exe
+rem     3) python (PATH)                   4) py -3 (launcher)
 rem
 rem Port selection:
 rem   8501 is the Streamlit default and is very often already taken by ANOTHER
@@ -23,19 +28,29 @@ rem ---------------------------------------------------------------------------
 
 set "PY="
 
-if exist "..\.conda\python.exe" set "PY=..\.conda\python.exe"
-if not defined PY if exist ".venv\Scripts\python.exe" set "PY=.venv\Scripts\python.exe"
-if not defined PY where python >nul 2>nul
-if not defined PY if not errorlevel 1 set "PY=python"
+if not defined PY if exist "..\.conda\python.exe" (
+    "..\.conda\python.exe" -c "import streamlit" >nul 2>nul
+    if not errorlevel 1 set "PY=..\.conda\python.exe"
+)
 
-if not defined PY where py >nul 2>nul
-if not defined PY if not errorlevel 1 set "PY=py -3"
+if not defined PY if exist ".venv\Scripts\python.exe" (
+    ".venv\Scripts\python.exe" -c "import streamlit" >nul 2>nul
+    if not errorlevel 1 set "PY=.venv\Scripts\python.exe"
+)
 
-if not defined PY goto no_python
+if not defined PY (
+    python -c "import streamlit" >nul 2>nul
+    if not errorlevel 1 set "PY=python"
+)
+
+if not defined PY (
+    py -3 -c "import streamlit" >nul 2>nul
+    if not errorlevel 1 set "PY=py -3"
+)
+
+if not defined PY goto no_streamlit
 
 echo [i] Using Python: %PY%
-%PY% -c "import streamlit" >nul 2>nul
-if errorlevel 1 goto no_streamlit
 
 rem ---- pick a free port ----------------------------------------------------
 set "PORT=8501"
@@ -60,15 +75,21 @@ start "" http://localhost:%PORT%
 %PY% -m streamlit run app.py --server.port %PORT% --server.headless true
 goto :end
 
-:no_python
-echo [X] No Python found.
-echo     Install Python 3.9+ with "Add to PATH" checked, then run this again.
-goto :end
-
 :no_streamlit
-echo [X] streamlit is not installed for this Python.
-echo     Run this first:
-echo         %PY% -m pip install -r requirements.txt
+echo [X] No Python with streamlit found.
+echo     Tried in order:
+echo         ..\.conda\python.exe
+echo         .venv\Scripts\python.exe
+echo         python
+echo         py -3
+echo.
+echo     Install streamlit for the interpreter you want to use, e.g.
+echo         py -3 -m pip install -r requirements.txt
+echo     or
+echo         python -m pip install -r requirements.txt
+echo.
+echo     Tip: check which Python actually has it:
+echo         py -3 -c "import streamlit; print('ok')"
 goto :end
 
 :no_port
